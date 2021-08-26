@@ -40,6 +40,21 @@ console.log(data)
 var crypt = cipher.encrypt(data);
 fs.writeFileSync(path,crypt)
 }
+this.crypt=(data,key)=>{
+    const cipher = AES.createCipher(key)
+
+console.log(data)
+var crypt = cipher.encrypt(data);
+return crypt
+}
+
+this.decrypt=(data,key)=>{
+    const cipher = AES.createCipher(key)
+
+console.log(data)
+var crypt = cipher.decrypt(data);
+return crypt
+}
  this.decryptfiles=(path,key)=>{
     const cipher = AES.createCipher(key)
 var data =fs.readFileSync(path)
