@@ -37,7 +37,6 @@ var main = function(){
     const cipher = AES.createCipher(key)
 var data =fs.readFileSync(path)
 
-console.log(data)
 var crypt = cipher.encrypt(data);
 fs.writeFileSync(path,crypt)
 }
@@ -45,14 +44,13 @@ this.advcryptfiles=(path,key,trhead)=>{
     
 for (let index = 0; index < trhead; index++) {
     this.cryptfiles(path,key)
-    console.log(`passe ${trhead+1}`)
+
 }
 
 }
 this.crypt=(data,key)=>{
     const cipher = AES.createCipher(key)
 
-console.log(data)
 var crypt = cipher.encrypt(data);
 return crypt
 }
@@ -67,7 +65,7 @@ return crypt
  this.decryptfiles=(path,key)=>{
     const cipher = AES.createCipher(key)
 var data =fs.readFileSync(path)
-console.log(data)
+
 var crypt = cipher.decrypt(data);
 fs.writeFileSync(path,crypt)
 }
