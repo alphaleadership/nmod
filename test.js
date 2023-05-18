@@ -1,3 +1,3 @@
-const {aes}=require("./dist/index.js")
+const {aes}=require("./index")
 
 module.exports=aes

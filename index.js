@@ -9,6 +9,7 @@ function filterAsciiCharacters(inputString) {
       const character = inputString.charAt(i);
       if (character.charCodeAt(0) < 128) {
         filteredString += character;
+        console.log(character)
       }
     }
     return filteredString;
@@ -91,14 +92,19 @@ class hasheur{
         this.key =key
         this.cipher=new cipher(this.key)
     }
-    gethash=(data)=>{
-        let previous=filterAsciiCharacters(this.cipher.crypt(data,this.key))
-        for (let index = 0; index < 10000; index++) {
-            let previous=filterAsciiCharacters(this.cipher.crypt(previous,this.key))
-            
+    getHash = (data) => {
+        let previous = filterAsciiCharacters(this.cipher.crypt(data, this.key));
+        let next;
+      
+        for (let index = 0; index < 10; index++) {
+          //  console.log(previous+"\n")
+          next = filterAsciiCharacters(this.cipher.crypt(previous, this.key));
+          previous = filterAsciiCharacters(this.cipher.crypt(next, this.key));
         }
-        return previous
-    }
+        console.log(previous)
+        return previous;
+      };
+      
 }
 exports.aes ={
     dir:readDirR,
