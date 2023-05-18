@@ -1,4 +1,4 @@
-require('dotenv').config()
+
 const fs = require("fs")
 const AES = require('aes256')
 //const log=require("log4js")
