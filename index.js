@@ -1,10 +1,73 @@
-
+require('dotenv').config()
 const fs = require("fs")
 const AES = require('aes256')
+//const log=require("log4js")
+const FileSystem = fs
+function filterAsciiCharacters(inputString) {
+    let filteredString = '';
+    for (let i = 0; i < inputString.length; i++) {
+      const character = inputString.charAt(i);
+      if (character.charCodeAt(0) < 128) {
+        filteredString += character;
+      }
+    }
+    return filteredString;
+  }
+  
+class cipher{
+    constructor(key){
+        this.key =key
+    }
+    cryptfiles=(path)=>{
+        const cipher = AES.createCipher(this.key)
+    var data =fs.readFileSync(path)
+    
+    var crypt = cipher.encrypt(data);
+    fs.writeFileSync(path,crypt)
+    }
+    advcryptfiles=(path,trhead)=>{
+    
+        for (let index = 0; index < trhead; index++) {
+            cryptfiles(path,this.key)
+        
+        }
+    
+    }
+    crypt=(data,key)=>{
+        const cipher = AES.createCipher(this.key)
+    
+    var crypt = cipher.encrypt(data);
+    return crypt
+    }
+    decrypt=(data,key)=>{
+        const cipher = AES.createCipher(this.key)
+    
+    console.log(data)
+    var crypt = cipher.decrypt(data);
+    return crypt
+    }
+      decryptfiles=(path)=>{
+        const cipher = AES.createCipher(this.key)
+    var data =fs.readFileSync(path)
+    
+    var crypt = cipher.decrypt(data);
+    fs.writeFileSync(path,crypt)
+    }
+      
+        
+       
+}
+const createCipher=cipher
 
-const FileSystem = require("fs")
-
-function readDirR(directory) {
+const   getkey =(length)=>{
+        var randomChars = fs.readFileSync("./ascii_characters.txt").toString()
+    var result = '';
+    for ( var i = 0; i < length; i++ ) {
+        result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
+    }
+    return result;
+}
+ readDirR=(directory)=>{
     var returnedFiles = []
     var files = FileSystem.readdirSync(directory)
     
@@ -23,54 +86,24 @@ console.log(directory+"/"+files[i])
     return returnedFiles
     
 }
-
-var main = function(){
-    this.getkey =(length)=>{
-        var randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    var result = '';
-    for ( var i = 0; i < length; i++ ) {
-        result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
+class hasheur{
+    constructor(key){
+        this.key =key
+        this.cipher=new cipher(this.key)
     }
-    return result;
+    gethash=(data)=>{
+        let previous=filterAsciiCharacters(this.cipher.crypt(data,this.key))
+        for (let index = 0; index < 10000; index++) {
+            let previous=filterAsciiCharacters(this.cipher.crypt(previous,this.key))
+            
+        }
+        return previous
+    }
 }
- this.cryptfiles=(path,key)=>{
-    const cipher = AES.createCipher(key)
-var data =fs.readFileSync(path)
-
-var crypt = cipher.encrypt(data);
-fs.writeFileSync(path,crypt)
-}
-this.advcryptfiles=(path,key,trhead)=>{
-    
-for (let index = 0; index < trhead; index++) {
-    this.cryptfiles(path,key)
+exports.aes ={
+    dir:readDirR,
+    createCipher:createCipher,
+    getkey:getkey,
+    hash:hasheur
 
 }
-
-}
-this.crypt=(data,key)=>{
-    const cipher = AES.createCipher(key)
-
-var crypt = cipher.encrypt(data);
-return crypt
-}
-
-this.decrypt=(data,key)=>{
-    const cipher = AES.createCipher(key)
-
-console.log(data)
-var crypt = cipher.decrypt(data);
-return crypt
-}
- this.decryptfiles=(path,key)=>{
-    const cipher = AES.createCipher(key)
-var data =fs.readFileSync(path)
-
-var crypt = cipher.decrypt(data);
-fs.writeFileSync(path,crypt)
-}
-    
-}
-
-module.exports=main
-
