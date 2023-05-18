@@ -9,7 +9,7 @@ function filterAsciiCharacters(inputString) {
       const character = inputString.charAt(i);
       if (character.charCodeAt(0) < 128) {
         filteredString += character;
-        console.log(character)
+        //console.log(character)
       }
     }
     return filteredString;
@@ -101,7 +101,7 @@ class hasheur{
           next = filterAsciiCharacters(this.cipher.crypt(previous, this.key));
           previous = filterAsciiCharacters(this.cipher.crypt(next, this.key));
         }
-        console.log(previous)
+       // console.log(previous)
         return previous;
       };
       
