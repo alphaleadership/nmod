@@ -65,7 +65,7 @@ const   getkey =(length)=>{
         var randomChars =[]
           for (let i = 0; i < 128; i++) {
     const character = String.fromCharCode(i);
-randomChars.append(character);
+        randomChars.push(character)
   }
     var result = '';
     for ( var i = 0; i < length; i++ ) {
