@@ -62,10 +62,10 @@ const createCipher=cipher
 
 const   getkey =(length)=>{
     
-        var randomChars =[]
+        var randomChars =""
           for (let i = 0; i < 128; i++) {
     const character = String.fromCharCode(i);
-        randomChars.push(character)
+        randomChars+=character
   }
     var result = '';
     for ( var i = 0; i < length; i++ ) {
