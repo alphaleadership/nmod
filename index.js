@@ -61,7 +61,12 @@ class cipher{
 const createCipher=cipher
 
 const   getkey =(length)=>{
-        var randomChars = fs.readFileSync("./ascii_characters.txt").toString()
+    
+        var randomChars =[]
+          for (let i = 0; i < 128; i++) {
+    const character = String.fromCharCode(i);
+randomChars.append(character);
+  }
     var result = '';
     for ( var i = 0; i < length; i++ ) {
         result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
