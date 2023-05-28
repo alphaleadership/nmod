@@ -1,6 +1,6 @@
 {
   "name": "aes512",
-  "version": "1.2.6",
+  "version": "1.2.7",
   "description": "liste des fonction \n .getkey(length) vous permet d'avoir une clé de sécurité compatible avec le module \n .cryptfiles(path ,key) vous sert a encrypter votre fichier le premier argument est le chemin le deuxième votre clée \n .decryptfiles(path ,key) vous sert a decrypter votre fichier le premier argument est le chemin le deuxième votre clée",
   "main": "index.js",
   "scripts": {
