@@ -21,7 +21,7 @@
   "scripts": {
     "build": "esbuild src/index.ts --bundle --platform=node --format=esm --outfile=dist/index.js && tsc -p tsconfig.build.json && node scripts/fix-dts.mjs",
     "typecheck": "tsc -p tsconfig.json",
-    "test": "node --test test/",
+    "test": "node --test \"test/*.test.ts\"",
     "demo": "npm run build && node examples/basic.mjs",
     "prepublishOnly": "npm run typecheck && npm run build && npm test"
   },
