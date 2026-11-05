@@ -1,4 +1,5 @@
 # aes512
+v2
 
 [![npm version](https://img.shields.io/npm/v/aes512.svg)](https://www.npmjs.com/package/aes512)
 [![CI](https://github.com/alphaleadership/nmod/actions/workflows/ci.yml/badge.svg)](https://github.com/alphaleadership/nmod/actions/workflows/ci.yml)
