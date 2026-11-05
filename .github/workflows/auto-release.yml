@@ -125,4 +125,4 @@ jobs:
             echo "aes512@$version déjà publié sur npm"
             exit 0
           fi
-          npm publish
+          npm stage publish
