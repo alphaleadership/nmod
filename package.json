@@ -1,20 +1,51 @@
 {
   "name": "aes512",
-  "version": "1.2.9",
-  "description": "liste des fonction \n .getkey(length) vous permet d'avoir une clé de sécurité compatible avec le module \n .cryptfiles(path ,key) vous sert a encrypter votre fichier le premier argument est le chemin le deuxième votre clée \n .decryptfiles(path ,key) vous sert a decrypter votre fichier le premier argument est le chemin le deuxième votre clée",
-  "main": "index.js",
-  "scripts": {
-    "test": "node test"
+  "version": "2.0.0",
+  "description": "Authenticated AES-256-GCM encryption toolkit for Node.js — keys, strings, files (streaming) and hashing. Outil de chiffrement authentifié AES-256-GCM pour Node.js.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
   },
   "files": [
-    "./"
+    "dist",
+    "README.md",
+    "README.fr.md"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "esbuild src/index.ts --bundle --platform=node --format=esm --outfile=dist/index.js && tsc -p tsconfig.build.json && node scripts/fix-dts.mjs",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "node --test test/",
+    "demo": "npm run build && node examples/basic.mjs",
+    "prepublishOnly": "npm run typecheck && npm run build && npm test"
+  },
+  "engines": {
+    "node": ">=22.12"
+  },
+  "keywords": [
+    "aes",
+    "aes-256",
+    "aes-256-gcm",
+    "gcm",
+    "encryption",
+    "decrypt",
+    "crypto",
+    "streaming",
+    "authenticated-encryption"
   ],
   "author": "",
   "license": "MIT",
-  "dependencies": {
-    "aes256": "^1.1.0"
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.9.0"
   },
-  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/alphaleadership/nmod.git"

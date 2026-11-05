@@ -1,0 +1,49 @@
+name: Rappel renouvellement token npm
+
+# Le token npm (secrets.npm_token) expire tous les 7 jours :
+# rappel chaque jeudi avant 8h (05:00 UTC = 06:00/07:00 Paris).
+on:
+  schedule:
+    - cron: '0 5 * * 4'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ouvrir un rappel (si aucun ouvert)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = 'Renouveler le token npm (tous les 7 jours — jeudi avant 8h)';
+            const { data: open } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100,
+            });
+            if (open.some((issue) => issue.title === title)) {
+              console.log('Un rappel est déjà ouvert, rien à faire.');
+              return;
+            }
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              labels: ['maintenance'],
+              body: [
+                '## Rappel automatique',
+                '',
+                'Le token npm (`npm_token`) utilisé par la release doit être **renouvelé avant 8h**.',
+                '',
+                '- [ ] Se connecter sur https://www.npmjs.com/settings/alphaleadership/tokens',
+                '- [ ] Générer un nouveau **Granular Access Token** (expiration : 7 jours, droits *Read and write* sur le paquet `aes512`)',
+                '- [ ] Mettre à jour le secret `npm_token` du dépôt GitHub',
+                '- [ ] Vérifier `npm whoami` avec le nouveau token',
+                '',
+                '> Généré automatiquement par `.github/workflows/npm-token-renewal.yml`.',
+              ].join('\n'),
+            });
