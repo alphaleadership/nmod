@@ -1,0 +1,128 @@
+name: Auto Release
+
+# Chaque push sur main :
+#   1. incrémente la version (patch par défaut ; ajouter #major ou #minor
+#      dans le sujet d'un commit pour forcer un saut de version)
+#   2. typecheck + build + tests doivent passer
+#   3. commit "chore(release): vX.Y.Z", tag, push, release GitHub (--generate-notes)
+#   4. publication npm (idempotente : sautée si la version existe déjà)
+#
+# Les pushes effectués avec le GITHUB_TOKEN ne redéclenchent pas de workflow :
+# pas de boucle infinie. En cas d'échec (ex. token npm expiré), une re-run
+# complète l'opération sans créer de version en double.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: auto-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+          registry-url: https://registry.npmjs.org/
+          cache: npm
+
+      - run: npm ci
+
+      - name: Planifier la release
+        id: plan
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          subject=$(git log -1 --format=%s)
+          current=$(node -p "require('./package.json').version")
+          release_exists=false
+          if gh release view "v$current" >/dev/null 2>&1; then
+            release_exists=true
+          fi
+
+          if [[ "$subject" == "chore(release):"* ]]; then
+            # Commit de release : ne relancer que si la release GitHub manque
+            if [[ "$release_exists" == "true" ]]; then
+              echo "need_release=false" >> "$GITHUB_OUTPUT"
+            else
+              echo "need_release=true" >> "$GITHUB_OUTPUT"
+            fi
+            echo "need_bump=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "need_release=true" >> "$GITHUB_OUTPUT"
+          if [[ "$release_exists" == "true" ]]; then
+            last=$(git describe --tags --abbrev=0)
+            subjects=$(git log "$last..HEAD" --format=%s)
+            bump=patch
+            if grep -qE '#major|\[major\]' <<< "$subjects"; then
+              bump=major
+            elif grep -qE '#minor|\[minor\]' <<< "$subjects"; then
+              bump=minor
+            fi
+            echo "need_bump=true" >> "$GITHUB_OUTPUT"
+            echo "bump=$bump" >> "$GITHUB_OUTPUT"
+          else
+            echo "need_bump=false" >> "$GITHUB_OUTPUT"
+            echo "bump=none" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Incrémenter la version
+        if: steps.plan.outputs.need_bump == 'true'
+        run: npm version "${{ steps.plan.outputs.bump }}" --no-git-tag-version
+
+      - name: Vérifications (typecheck, build, tests)
+        if: steps.plan.outputs.need_release == 'true'
+        run: |
+          npm run typecheck
+          npm run build
+          npm test
+
+      - name: Commit, tag, push, release GitHub
+        if: steps.plan.outputs.need_release == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          version=$(node -p "require('./package.json').version")
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if ! git diff --quiet -- package.json package-lock.json; then
+            git add package.json package-lock.json
+            git commit -m "chore(release): v$version"
+          fi
+
+          if ! git rev-parse -q --verify "refs/tags/v$version" >/dev/null; then
+            git tag "v$version"
+          fi
+
+          git push origin HEAD:main "refs/tags/v$version"
+
+          if ! gh release view "v$version" >/dev/null 2>&1; then
+            gh release create "v$version" --title "v$version" --generate-notes
+          fi
+
+      - name: Publier sur npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
+        run: |
+          set -euo pipefail
+          version=$(node -p "require('./package.json').version")
+          if npm view "aes512@$version" version >/dev/null 2>&1; then
+            echo "aes512@$version déjà publié sur npm"
+            exit 0
+          fi
+          npm publish
